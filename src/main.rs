@@ -58,13 +58,10 @@ fn handle_client(stream: &mut TcpStream) {
             Ok(task) => task,
             Err(e) => return send_err(stream, e)
         };
-        println!("we have a task {:?}", task);
         // now that we have our Task{}, determine the event type
         let task_type = task_types.determine_task_type(task.command_type);
-        println!("task type is: {}", task_type);
         if task_type == "filesystem" {
             // start the filesystem thread and go go go
-            println!("ahhh filesystem it is");
             let out_c = channel_out.clone();
             filesystem::handle_filesystem(task, out_c);
         }
