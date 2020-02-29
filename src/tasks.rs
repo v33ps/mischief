@@ -1,5 +1,7 @@
 use serde::{Serialize, Deserialize};
+#[allow(unused_imports)]
 use crossbeam_channel::{unbounded, RecvError, TryRecvError};
+#[allow(unused_imports)]
 use crossbeam_channel::{Receiver, Sender};
 use std::collections::HashMap;
 
@@ -35,14 +37,14 @@ impl TaskCommandTypes {
     }
 }
 
-
-pub fn handle_filesystem(task: Task, channel_out: Sender<String>) {
-    // look at the @task.function to see if we should call create_file, delete_file, etc etc
-
-    // just a PoC for now to see that this whole thing works
-    let filename = task.params.get("filename").unwrap();
-    channel_out.send(filename.to_string()); // should probably handle error...
-}
+// 
+// pub fn handle_filesystem(task: Task, channel_out: Sender<String>) {
+//     // look at the @task.function to see if we should call create_file, delete_file, etc etc
+//
+//     // just a PoC for now to see that this whole thing works
+//     let filename = task.params.get("filename").unwrap();
+//     channel_out.send(filename.to_string()); // should probably handle error...
+// }
 
 // impl Default for Task {
 //     fn default() -> Self {

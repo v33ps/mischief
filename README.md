@@ -16,6 +16,6 @@ nc localhost 8080
 14
 
 
-{"taskId":22,"commandType":1,"function":"filesystem","iterations":2,"params":{"filename":"testing.txt","block":"yes"}}
+{"taskId":22,"commandType":1,"function":"create_file","iterations":2,"params":{"filename":"testing.txt","block":"yes"}}
 
 ```

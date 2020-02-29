@@ -2,16 +2,23 @@ use std::net::{TcpStream, TcpListener};
 use std::io::{Read, Write};
 use std::thread;
 use serde_json::{Error};
+#[allow(unused_imports)]
 use serde::{Serialize, Deserialize};
+#[allow(unused_imports)]
 use crossbeam_channel::{unbounded, RecvError, TryRecvError};
+#[allow(unused_imports)]
 use crossbeam_channel::{Receiver, Sender};
 
 mod tasks;
 use tasks::*;
-
+mod filesystem;
+// #[allow(unused_imports)]
+use filesystem::*;
+use log::{info, trace, warn};
 
 fn main() {
-    println!("Hello, world!");
+    // println!("Hello, world!");
+    info!("hello there");
 
     // get incoming clients and spawn them into a thread
     let listener = TcpListener::bind("localhost:8080").unwrap();
@@ -54,11 +61,12 @@ fn handle_client(stream: &mut TcpStream) {
         println!("we have a task {:?}", task);
         // now that we have our Task{}, determine the event type
         let task_type = task_types.determine_task_type(task.command_type);
-
+        println!("task type is: {}", task_type);
         if task_type == "filesystem" {
             // start the filesystem thread and go go go
+            println!("ahhh filesystem it is");
             let out_c = channel_out.clone();
-            tasks::handle_filesystem(task, out_c);
+            filesystem::handle_filesystem(task, out_c);
         }
 
         // peek into the channel from our thread to see if there is data
