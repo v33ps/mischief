@@ -41,7 +41,7 @@ fn main() {
 */
 fn handle_client(stream: &mut TcpStream) {
     // loop forever waiting for data from the client
-    let (channel_out, channel_in) = unbounded();
+    // let (channel_out, channel_in) = unbounded();
     loop {
         let mut buf = [0; 1024];
 
@@ -50,20 +50,21 @@ fn handle_client(stream: &mut TcpStream) {
             Ok(task) => task,
             Err(e) => return send_err(stream, e)
         };
+        println!("we have a task {:?}", task);
         // now that we have our Task{}, determine the event type
-        let task_type = task.determine_task_type();
-
-        if task_type == "filesystem" {
-            // start the filesystem thread and go go go
-            let out_c = channel_out.clone();
-            tasks::handle_filesystem(task, out_c);
-        }
-
-
-        if let Ok(resp_from_thread) = channel_in.try_recv() {
-            println!("yayyy {}", &resp_from_thread);
-            let _ = stream.write(resp_from_thread.to_string().as_bytes()).expect("failed to send task response");
-        }
+        // let task_type = task.determine_task_type();
+        //
+        // if task_type == "filesystem" {
+        //     // start the filesystem thread and go go go
+        //     let out_c = channel_out.clone();
+        //     tasks::handle_filesystem(task, out_c);
+        // }
+        //
+        //
+        // if let Ok(resp_from_thread) = channel_in.try_recv() {
+        //     println!("yayyy {}", &resp_from_thread);
+        //     let _ = stream.write(resp_from_thread.to_string().as_bytes()).expect("failed to send task response");
+        // }
         // look for data coming out of our channel, nonblocking
         // let resp_from_thread = match channel_in.try_recv() {
         //     Ok(resp_from_thread) => resp_from_thread,

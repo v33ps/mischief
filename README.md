@@ -14,4 +14,8 @@ goal is send json to endpoint, it can do stuff like
 nc localhost 8080
 {"name":"filesystem", "data":"howdy partner", "counter":9}
 14
+
+
+{"taskId":22,"commandType":23,"function":"filesystem","iterations":2,"params":{"address":"www.facebook.com","block":"yes"}}
+
 ```

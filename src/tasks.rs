@@ -1,25 +1,36 @@
 use serde::{Serialize, Deserialize};
 use crossbeam_channel::{unbounded, RecvError, TryRecvError};
 use crossbeam_channel::{Receiver, Sender};
+use std::collections::HashMap;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Task {
-    pub data: String,
-    pub name: String,
-    pub counter: i32,
+    pub task_id: i32,
+    pub command_type: i64,
+    pub function: String,
+    pub iterations: i32,
+    pub params: HashMap<String, serde_json::Value>,
 }
 
-impl Task {
-    pub fn determine_task_type(&self) -> &String {
-        &self.name
-    }
-}
-
-pub fn handle_filesystem(task: Task, channel_out: Sender<i32>) {
-    let result = task.counter + 5;
-    channel_out.send(result);
-}
+// #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+// pub struct FilesystemTaskParams {
+//     pub directory: String,
+//     pub filename: String,
+//     pub content: String,
+//     pub permissions: i32,
+// }
+//
+// impl Task {
+//     pub fn determine_task_type(&self) -> &String {
+//         &self.name
+//     }
+// }
+//
+// pub fn handle_filesystem(task: Task, channel_out: Sender<i32>) {
+//     let result = task.counter + 5;
+//     channel_out.send(result);
+// }
 
 //
 // pub trait JSONTrait {
