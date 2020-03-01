@@ -12,6 +12,7 @@ pub struct Task {
     pub command_type: i64,
     pub function: String,
     pub iterations: i32,
+    pub state: i32, // 0 for new, 1 for processing, 2 for done
     pub params: HashMap<String, serde_json::Value>,
 }
 
