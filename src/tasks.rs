@@ -8,6 +8,7 @@ use std::collections::HashMap;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Task {
+    #[serde(rename = "taskID")]
     pub task_id: i32,
     pub command_type: i64,
     pub function: String,

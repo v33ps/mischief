@@ -98,11 +98,16 @@ impl Client {
             Ok(_) => (),
             Err(e) => println!("error : {}", e.to_string())
         };
-        println!("buffer before serializaztion: {}", buffer);
+        if res.status() != 204 {
+            println!("task buffer before serializaztion: {}", buffer);
+            let v = serde_json::from_str::<Client>(&buffer).expect("oh");
 
-        let v = serde_json::from_str::<Task>(&buffer).expect("oh");
+            for task in v.task_queue {
+                self.task_queue.push(task);
+            }
+        }
 
-        self.task_queue.push(v);
+
 
     }
 }
@@ -123,7 +128,8 @@ fn main() {
         println!("omg hi");
 
         // get new tasks from the server
-        // client.get_task();
+        // need to return success/failure so we know if we should send something into the thread or not
+        client.get_task();
         // fuck me
         let mut c = client.clone();
         let out_c = channel_out.clone();
@@ -132,8 +138,8 @@ fn main() {
             handle_task(&mut c, out_c);
         });
         if let Ok(resp_from_thread) = channel_in.try_recv() {
-            println!("yayyy {}", &resp_from_thread);
-            //let _ = stream.write(resp_from_thread.to_string().as_bytes()).expect("failed to send task response");
+            println!("yayyy from main {}", &resp_from_thread);
+            // need to send resp to server, and remvoe task from the queue
         }
     }
 
@@ -175,9 +181,9 @@ fn handle_task(client: &mut Client, main_out_c: Sender<String>) {
             // peek into the channel from our thread to see if there is data
             // if there is, send it back
             if let Ok(resp_from_thread) = channel_in.try_recv() {
-                println!("yayyy {}", &resp_from_thread);
+                println!("handle_task got something: {}", &resp_from_thread);
                 main_out_c.send(resp_from_thread).unwrap();
-                // let _ = stream.write(resp_from_thread.to_string().as_bytes()).expect("failed to send task response");
+                task.state = 2; // dont' think this is working
             }
         }
     }
