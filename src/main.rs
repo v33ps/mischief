@@ -101,9 +101,22 @@ impl Client {
         if res.status() != 204 {
             println!("task buffer before serializaztion: {}", buffer);
             let v = serde_json::from_str::<Client>(&buffer).expect("oh");
-
-            for task in v.task_queue {
-                self.task_queue.push(task);
+            // check to see that the taskID doesn't already exist in our task_queue
+            let mut found = false;
+            for current_task in &mut self.task_queue {
+                for new_task in & v.task_queue {
+                    if current_task.task_id == new_task.task_id {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            // if we haven't found this task, then add it to the queue. Otherwise, we are probably
+            // already processing it
+            if found != true {
+                for task in v.task_queue {
+                    self.task_queue.push(task);
+                }
             }
         }
 
@@ -140,6 +153,8 @@ fn main() {
         if let Ok(resp_from_thread) = channel_in.try_recv() {
             println!("yayyy from main {}", &resp_from_thread);
             // need to send resp to server, and remvoe task from the queue
+            let resp_task_id = resp_from_thread.parse::<i32>().unwrap();
+            client.task_queue.retain(|x| x.task_id != resp_task_id);
         }
     }
 
@@ -182,8 +197,9 @@ fn handle_task(client: &mut Client, main_out_c: Sender<String>) {
             // if there is, send it back
             if let Ok(resp_from_thread) = channel_in.try_recv() {
                 println!("handle_task got something: {}", &resp_from_thread);
+                // should send the task ID back out if successful. Otherwise, an err string
                 main_out_c.send(resp_from_thread).unwrap();
-                task.state = 2; // dont' think this is working
+                task.state = 2;
             }
         }
     }

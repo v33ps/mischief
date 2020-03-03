@@ -23,17 +23,18 @@ pub fn handle_filesystem(task: &mut Task, channel_out: Sender<String>) {
     let path = Path::new(&filename);
     if task.function == String::from("create_file") {
         let ret = match create_file(&path) {
-            Ok(_) => filename.to_string(),
+            Ok(_) => task.task_id.to_string(),
             Err(err) => err.to_string()
         };
         channel_out.send(ret.to_string()).unwrap();
     } else if task.function == String::from("write_file") {
         let contents = task.params["content"].as_str().unwrap();
         let ret = match write_file(&path, contents.to_string()) {
-            Ok(_) => filename.to_string(),
+            Ok(_) => task.task_id.to_string(),
             Err(err) => err.to_string()
         };
-        channel_out.send(ret.to_string()).unwrap();
+        println!("ret: {}", ret);
+        channel_out.send(ret).unwrap();
     }
 }
 
