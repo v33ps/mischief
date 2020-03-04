@@ -35,6 +35,13 @@ pub fn handle_filesystem(task: &mut Task, channel_out: Sender<String>) {
         };
         println!("ret: {}", ret);
         channel_out.send(ret).unwrap();
+    } else if task.function == String::from("delete_file") {
+        let ret = match delete_file(&path) {
+            Ok(_) => task.task_id.to_string(),
+            Err(err) => err.to_string()
+        };
+        println!("ret: {}", ret);
+        channel_out.send(ret).unwrap();
     }
 }
 
@@ -49,4 +56,11 @@ fn write_file(path: &Path, content: String) -> std::io::Result<()> {
     let mut file = OpenOptions::new().write(true).open(&path)?;
     file.write_all(content.as_bytes())?;
     Ok(())
+}
+
+pub fn delete_file(path: &Path) -> std::io::Result<()> {
+    match remove_file(&path) {
+        Ok(_) => return Ok(()),
+        Err(er) => return Err(er),
+    };
 }
