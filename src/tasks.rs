@@ -8,11 +8,15 @@ use std::collections::HashMap;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Task {
+    #[serde(rename = "taskID")]
     pub task_id: i32,
     pub command_type: i64,
     pub function: String,
     pub iterations: i32,
+    pub iteration_delay: i32,
+    pub state: i32, // 0 for new, 1 for processing, 2 for done
     pub params: HashMap<String, serde_json::Value>,
+    pub block: i32, //0 for no, 1 for yes
 }
 
 pub struct TaskCommandTypes {
@@ -37,7 +41,7 @@ impl TaskCommandTypes {
     }
 }
 
-// 
+//
 // pub fn handle_filesystem(task: Task, channel_out: Sender<String>) {
 //     // look at the @task.function to see if we should call create_file, delete_file, etc etc
 //
