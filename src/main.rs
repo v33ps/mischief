@@ -138,7 +138,6 @@ fn main() {
     // sleep for duration given by server, every interval wake up and ask for new tasks
     loop {
         thread::sleep(sleep_duration);
-        println!("omg hi");
 
         // get new tasks from the server
         // need to return success/failure so we know if we should send something into the thread or not
@@ -157,26 +156,6 @@ fn main() {
             client.task_queue.retain(|x| x.task_id != resp_task_id);
         }
     }
-
-
-
-
-    //
-    // // get incoming clients and spawn them into a thread
-    // let listener = TcpListener::bind("localhost:8080").unwrap();
-    //
-    // for stream in listener.incoming() {
-    //     match stream {
-    //         Ok(mut stream) => {
-    //             let thread_hndl = thread::spawn(move || {
-    //                 handle_client(&mut stream);
-    //             });
-    //         }
-    //         Err(e) => {
-    //             println!("Unable to connect client: {}", e);
-    //         }
-    //     }
-    // }
 }
 
 fn handle_task(client: &mut Client, main_out_c: Sender<String>) {
@@ -185,7 +164,11 @@ fn handle_task(client: &mut Client, main_out_c: Sender<String>) {
 
     // walk over the task queue. For any task_queue.state == 0, handle it.
     for task in &mut client.task_queue {
-        if task.state == 0 {
+        // all tasks will have at least 1 iteration, but may have more. We also may have a sleep
+        // between iterations
+        let duration = (task.iteration_delay * 1000) as u64;
+        let sleep_duration = time::Duration::from_millis(duration);
+        for _iteration in 0..task.iterations {
             let task_type = task_types.determine_task_type(task.command_type);
             if task_type == "filesystem" {
                 // start the filesystem thread and go go go
@@ -201,47 +184,10 @@ fn handle_task(client: &mut Client, main_out_c: Sender<String>) {
                 main_out_c.send(resp_from_thread).unwrap();
                 task.state = 2;
             }
+            thread::sleep(sleep_duration);
         }
     }
 }
-
-
-/*
-    @brief: gets the client connected
-
-    This function is run as a thread. It spins and spins waiting for data from the client, then
-    decides how to handle the data
-    @params:
-        - stream: the TCP stream that the client came in over
-*/
-// fn handle_client(stream: &mut TcpStream) {
-//     // loop forever waiting for data from the client
-//     let (channel_out, channel_in) = unbounded();
-//     let task_types = TaskCommandTypes::new();
-//     loop {
-//         let mut buf = [0; 1024];
-//
-//         // once we get data, send it to get_command() to desearlize it
-//         let task = match get_command(stream, &mut buf) {
-//             Ok(task) => task,
-//             Err(e) => return send_err(stream, e)
-//         };
-//         // now that we have our Task{}, determine the event type
-//         let task_type = task_types.determine_task_type(task.command_type);
-//         if task_type == "filesystem" {
-//             // start the filesystem thread and go go go
-//             let out_c = channel_out.clone();
-//             filesystem::handle_filesystem(task, out_c);
-//         }
-//
-//         // peek into the channel from our thread to see if there is data
-//         // if there is, send it back
-//         if let Ok(resp_from_thread) = channel_in.try_recv() {
-//             println!("yayyy {}", &resp_from_thread);
-//             let _ = stream.write(resp_from_thread.to_string().as_bytes()).expect("failed to send task response");
-//         }
-//     }
-// }
 
 fn serializer(msg: String) -> Result<Task, Error> {
     let v = match serde_json::from_str::<Task>(&msg){
